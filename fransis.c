@@ -26,6 +26,15 @@ long fransis_ioctl (
     return 0;
 }
 
+long fransis_ioctl_32 (
+	struct file *p_file,
+	unsigned int cmd,
+	unsigned long buf)
+{
+    printk("fransis: ioctl 32 bit\n");
+    return 0;
+}
+
 int fransis_open (
 	struct inode *p_inode,
 	struct file *p_file)
@@ -42,66 +51,28 @@ int fransis_release (
     return 0;
 }
 
+ssize_t fransis_write(struct file *f, const char __user *buf, size_t len,
+    loff_t *off)
+{
+    printk("fransis: write\n");
+    return len;
+}
+
+ssize_t fransis_read(struct file *f, char __user *buf, size_t len, loff_t *off)
+{
+    printk("fransis: read\n");
+    return 0;
+}
 
 struct file_operations fransis_fops = {
     .owner = THIS_MODULE,
     .open = fransis_open,
+		.read = fransis_read,
+		.write = fransis_write,
     .release = fransis_release,
-    .unlocked_ioctl = fransis_ioctl
+    .unlocked_ioctl = fransis_ioctl,
+		.compat_ioctl = fransis_ioctl_32
 };
-
-int fransis_create_devnode (char *dev_base_name, char *dev_base_name_dir,
-                          int major, int start_minor, int count)
-{
-/*  mm_segment_t oldfs = get_fs();
-  struct dentry *p_dentry = NULL;
-  struct nameidata nd = {.flags = 0};
-  int i = 0;
-  char dev_name[] = FRANSIS_DEV_NAME;
-  long error = 0;
-  dev_t dev = 0;
-  struct path path = {0};
-  struct filename fname = {0};
-  fname.name = dev_name;
-  nd.name = &fname;
-  nd.dfd = AT_FDCWD;
-  error = path_parentat (&nd,  LOOKUP_RCU, &path);
-  nd.path = path;
-  if (error != 0)
-  {
-    printk ("fransis: path_lookup for '%s' failed. err = %ld.\n",
-      dev_name, error);
-    goto out;
-  }
-      dev = MKDEV(major, i);
-      set_fs (KERNEL_DS);
-
-      error = VFS_MKNOD(nd.DENTRY->d_inode,p_dentry,nd.MNT,dev);
-      if (error == -EEXIST)
-      {
-          error = VFS_UNLINK(nd.DENTRY->d_inode, p_dentry,nd.MNT);
-          if (error)
-          {
-            printk ("Failed to remove the device %s . err = %d\n",dev_name, (int)error);
-              error = 0;
-          }
-          else
-          {
-            error = VFS_MKNOD(nd.DENTRY->d_inode,p_dentry,nd.MNT,dev);
-            if (!error)
-                printk ("Successfully removed the stale dev node %s and recreated it.\n", dev_name);
-            else
-              printk ("Successfully removed the stale dev node %s but failed recreating it with ret %d.\n", dev_name, (int)error);
-          }
-      }
-
-      set_fs (oldfs);
-      inode_unlock(nd.DENTRY->d_inode);
-      PATH_RELEASE(&nd);
-  out:
-    return error;*/
-    return 0;
-}
 
 int fransis_create_and_register_device (void)
 {
@@ -115,8 +86,8 @@ int fransis_create_and_register_device (void)
 
     if (ret < 0)
     {
-	printk ("fransis: Failed to register with kernel. err = %d.\n", ret);
-	return ret;
+			printk ("fransis: Failed to register with kernel. err = %d.\n", ret);
+			return ret;
     }
 
     if (IS_ERR(cl = class_create(THIS_MODULE, FRANSIS_DEV_BASE_NAME)))
@@ -146,21 +117,12 @@ int fransis_create_and_register_device (void)
 
     cdev_init(fransis_cdev, &fransis_fops);
     fransis_cdev->owner = THIS_MODULE;
-/*
-    result = fransis_create_devnode (FRANSIS_DEV_BASE_NAME, FRANSIS_DEV_BASE_DIR_NAME,
-                                    _fransis_g_major, FRANSIS_DEVICE_MINOR, num_fransis_devices);
-    if (result != 0)
-    {
-	printk ("fransis: Failed to create the device node `%s'. err = %d.\n",
-	       FRANSIS_DEV_NAME, result);
-	goto out;
-    }
-*/
+
     result = cdev_add(fransis_cdev, fransis_dev, num_fransis_devices);
     if (result != 0)
     {
-	printk ("fransis: Failed to cdev_add %d devices\n", num_fransis_devices);
-	goto out;
+			printk ("fransis: Failed to cdev_add %d devices\n", num_fransis_devices);
+				goto out;
     }
 
     if (!try_module_get (THIS_MODULE))
@@ -171,11 +133,11 @@ int fransis_create_and_register_device (void)
 out:
     if (result != 0)
     {
-	if (fransis_cdev)
-	    cdev_del(fransis_cdev);
-        device_destroy(cl, fransis_dev);
-        class_destroy(cl);
-	       unregister_chrdev_region (fransis_dev, num_fransis_devices);
+				if (fransis_cdev)
+					cdev_del(fransis_cdev);
+				device_destroy(cl, fransis_dev);
+				class_destroy(cl);
+				unregister_chrdev_region (fransis_dev, num_fransis_devices);
     }
 
     return result;
@@ -201,8 +163,6 @@ static void __exit fransis_exit(void) /* Destructor */
 
 module_init(fransis_init);
 module_exit(fransis_exit);
-
-
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Francisco Giana <gianafrancisco@gmail.com>");

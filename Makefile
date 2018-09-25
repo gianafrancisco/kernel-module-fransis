@@ -7,11 +7,12 @@ ifeq (${KERNELRELEASE},)
     PWD := $(shell pwd)
 default:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} modules
-	${CC} -o cli cli.c
+	${CC} -o cli_64 cli.c
+	${CC} -m32 -o cli cli.c
 
 clean:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} clean
-	rm -f cli
+	rm -f cli cli_64
 
 # Otherwise KERNELRELEASE is defined; we've been invoked from the
 # kernel build system and can use its language.
