@@ -15,7 +15,20 @@ int _fransis_g_major = 0;
 static struct cdev *fransis_cdev = NULL;
 static struct class *cl;
 
-
+long process (unsigned int cmd){
+	switch(cmd){
+		case IOCTL_SET_MSG:
+			printk("fransis: IOCTL_SET_MSG\n");
+			break;
+		case IOCTL_GET_MSG:
+			printk("fransis: IOCTL_GET_MSG\n");
+			break;
+		case IOCTL_GET_NTH_BYTE:
+			printk("fransis: IOCTL_GET_NTH_BYTE\n");
+			break;
+	}
+	return 0;
+}
 
 long fransis_ioctl (
 	struct file *p_file,
@@ -23,7 +36,7 @@ long fransis_ioctl (
 	unsigned long buf)
 {
     printk("fransis: ioctl\n");
-    return 0;
+    return process(cmd);
 }
 
 long fransis_ioctl_32 (
@@ -32,7 +45,7 @@ long fransis_ioctl_32 (
 	unsigned long buf)
 {
     printk("fransis: ioctl 32 bit\n");
-    return 0;
+		return process(cmd);
 }
 
 int fransis_open (

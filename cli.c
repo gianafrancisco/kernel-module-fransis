@@ -23,7 +23,7 @@ int ioctl_set_msg(int file_desc, char *message)
 int ioctl_get_msg(int file_desc)
 {
   int ret_val;
-  char message[100];
+  char message[100] = { 0 };
   ret_val = ioctl(file_desc, IOCTL_GET_MSG, message);
 
   if (ret_val < 0) {
