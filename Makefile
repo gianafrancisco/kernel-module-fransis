@@ -3,8 +3,7 @@
 # if KERNELRELEASE is not defined, we've been called directly from the command line.
 # Invoke the kernel build system.
 ifeq (${KERNELRELEASE},)
-    #KERNEL_SOURCE := /lib/modules/$(shell uname -r)/build
-    KERNEL_SOURCE := /home/fgiana/mcafee/xerox/kernel/4.8.26-rt14
+    KERNEL_SOURCE := /lib/modules/$(shell uname -r)/build
     PWD := $(shell pwd)
 default:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} modules
