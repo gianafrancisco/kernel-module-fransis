@@ -7,15 +7,8 @@
 #include <linux/cdev.h>
 #include <linux/namei.h>
 #include <asm/uaccess.h>
-
-#define FRANSIS_DEV_BASE_NAME "fransis"
-#define FRANSIS_DEV_BASE_DIR_NAME "/dev/"
-#define FRANSIS_DEVICE_MINOR  0
-#define FRANSIS_DEV_NAME  "/dev/fransis"
-
-#define	VFS_UNLINK(inode,dentry,vfsmnt)		vfs_unlink((inode),(dentry), NULL)
-#define	VFS_MKNOD(inode,dentry,vfsmnt,dev)	vfs_mknod ((inode),(dentry),S_IFCHR | 0700, (dev))
-#define PATH_RELEASE(nd)                path_put(&(nd)->path)
+#include <linux/device.h>
+#include "fransis.h"
 
 static dev_t fransis_dev;
 int _fransis_g_major = 0;
@@ -29,7 +22,7 @@ long fransis_ioctl (
 	unsigned int cmd,
 	unsigned long buf)
 {
-    printk("fransis: ioctl");
+    printk("fransis: ioctl\n");
     return 0;
 }
 
@@ -37,7 +30,7 @@ int fransis_open (
 	struct inode *p_inode,
 	struct file *p_file)
 {
-    printk("fransis: open");
+    printk("fransis: open\n");
     return 0;
 }
 
@@ -45,7 +38,7 @@ int fransis_release (
 	struct inode *p_inode,
 	struct file *p_file)
 {
-    printk("fransis: release");
+    printk("fransis: release\n");
     return 0;
 }
 
@@ -191,9 +184,9 @@ out:
 
 static int __init fransis_init(void) /* Constructor */
 {
-    printk("fransis: registered");
+    printk("fransis: registered\n");
     fransis_create_and_register_device();
-    printk("fransis: registered device fransis");
+    printk("fransis: registered device fransis\n");
     return 0;
 }
 
@@ -203,7 +196,7 @@ static void __exit fransis_exit(void) /* Destructor */
     device_destroy(cl, fransis_dev);
     class_destroy(cl);
     unregister_chrdev_region(fransis_dev, 1);
-    printk("fransis: unregistered");
+    printk("fransis: unregistered\n");
 }
 
 module_init(fransis_init);
